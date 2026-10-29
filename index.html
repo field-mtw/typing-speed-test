@@ -100,6 +100,27 @@
       @media (prefers-color-scheme: dark){ .seg button[aria-pressed="true"]{background:var(--ink);color:#12140f} }
       .seg button:focus-visible,.btn:focus-visible,.type-card:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 
+      /* ---------- Keyboard language badge + warning ---------- */
+      .kb-group{margin-left:auto}
+      .kb-badge{
+        display:inline-flex;align-items:center;gap:8px;
+        background:var(--card);border:1px solid var(--line);border-radius:999px;
+        padding:9px 14px;font-weight:700;font-size:14.5px;box-shadow:var(--shadow);color:var(--ink-2);
+      }
+      .kb-badge svg{width:17px;height:17px;flex:none}
+      .kb-badge .kb-dot{width:8px;height:8px;border-radius:50%;background:var(--ink-3);flex:none}
+      .kb-badge.match{color:var(--ink)}
+      .kb-badge.match .kb-dot{background:var(--accent)}
+      .kb-badge.mismatch{color:var(--bad);border-color:var(--bad)}
+      .kb-badge.mismatch .kb-dot{background:var(--bad)}
+      .kb-warn{
+        margin-top:14px;display:flex;gap:10px;align-items:flex-start;
+        background:var(--bad-soft);border:1px solid var(--bad);color:var(--ink);
+        border-radius:14px;padding:12px 14px;font-size:14.5px;font-weight:600;box-shadow:var(--shadow);
+      }
+      .kb-warn[hidden]{display:none}
+      .kb-warn svg{width:19px;height:19px;flex:none;color:var(--bad);margin-top:1px}
+
       /* ---------- Live stats strip ---------- */
       .stats{
         margin-top:16px;display:grid;grid-template-columns:repeat(4,1fr);gap:10px;
@@ -254,6 +275,14 @@
             <button type="button" data-dur="120" aria-pressed="false">120 วิ</button>
           </div>
         </div>
+        <div class="ctl-group kb-group">
+          <span class="ctl-label">แป้นพิมพ์ของคุณ</span>
+          <span class="kb-badge" id="kbBadge" role="status">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><rect x="2" y="6" width="20" height="12" rx="2"/><path d="M6 10h.01M10 10h.01M14 10h.01M18 10h.01M6 14h.01M18 14h.01M9 14h6"/></svg>
+            <span class="kb-dot"></span>
+            <span id="kbBadgeText">คีย์บอร์ด: ไม่ทราบ</span>
+          </span>
+        </div>
       </div>
 
       <!-- Live stats -->
@@ -276,6 +305,12 @@
         </div>
       </div>
       <div class="progress" aria-hidden="true"><div id="progressBar"></div></div>
+
+      <!-- Keyboard language mismatch warning -->
+      <div class="kb-warn" id="kbWarn" role="alert" hidden>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>
+        <span id="kbWarnText"></span>
+      </div>
 
       <!-- Typing card -->
       <div class="type-card" id="typeCard">
@@ -491,6 +526,7 @@
           hintText.textContent = "คลิกที่กล่องนี้ แล้วเริ่มพิมพ์ได้เลย — นาฬิกาเริ่มเมื่อพิมพ์ตัวแรก";
           updateStats(0);
           markCurrent();
+          updateKbUI();
         }
 
         function markCurrent() {
@@ -710,6 +746,67 @@
         $("btnNew").addEventListener("click", function (ev) { ev.stopPropagation(); restartNew(); });
         $("btnAgain").addEventListener("click", restartSame);
         $("btnAgainNew").addEventListener("click", restartNew);
+
+        /* ---------- Keyboard language detection ---------- */
+        var kbLang = "unknown";   // 'th' | 'en' | 'other' | 'unknown'
+        var kbFromLayout = false; // true once getLayoutMap() gave a verdict
+        var kbBadge = $("kbBadge"), kbBadgeText = $("kbBadgeText");
+        var kbWarn = $("kbWarn"), kbWarnText = $("kbWarnText");
+        var KB_LABEL = { th: "ไทย", en: "English", other: "ภาษาอื่น", unknown: "ไม่ทราบ" };
+
+        function updateKbUI() {
+          kbBadgeText.textContent = "คีย์บอร์ด: " + KB_LABEL[kbLang];
+          var known = kbLang === "th" || kbLang === "en";
+          var mismatch = known && kbLang !== lang;
+          kbBadge.classList.toggle("match", known && !mismatch);
+          kbBadge.classList.toggle("mismatch", mismatch);
+          if (mismatch) {
+            kbWarnText.textContent = "ระวัง — ตอนนี้คีย์บอร์ดของคุณเป็นภาษา" + (kbLang === "th" ? "ไทย" : "อังกฤษ")
+              + " แต่รอบนี้เป็นแบบทดสอบ" + (lang === "th" ? "ภาษาไทย" : "ภาษาอังกฤษ")
+              + " สลับภาษาคีย์บอร์ดให้ตรงก่อนเริ่มพิมพ์ จะได้ไม่เสียรอบครับ";
+            kbWarn.hidden = false;
+          } else {
+            kbWarn.hidden = true;
+          }
+        }
+
+        function setKbLang(v) {
+          if (v && v !== kbLang) kbLang = v;
+          updateKbUI();
+        }
+
+        /* Primary: Keyboard API layout map (Chrome / Edge on desktop).
+           Sample a few keys — Thai layout maps them to Thai chars (KeyQ→ๆ, KeyA→ฟ). */
+        function detectKbLayout() {
+          try {
+            if (!navigator.keyboard || !navigator.keyboard.getLayoutMap) return;
+            navigator.keyboard.getLayoutMap().then(function (map) {
+              var codes = ["KeyQ", "KeyA", "KeyM", "KeyW", "KeyE"];
+              var th = 0, en = 0;
+              for (var i = 0; i < codes.length; i++) {
+                var ch = map.get(codes[i]) || "";
+                if (/[\u0E00-\u0E7F]/.test(ch)) th++;
+                else if (/^[a-z]$/.test(ch)) en++;
+              }
+              kbFromLayout = true;
+              if (th >= 3) setKbLang("th");
+              else if (en >= 3) setKbLang("en");
+              else setKbLang("other");
+            }).catch(function () { /* detection unavailable — stay quiet */ });
+          } catch (e) { /* API missing — badge stays "ไม่ทราบ" until first keystroke */ }
+        }
+        detectKbLayout();
+        /* Re-check when the window regains focus (user may have Alt+Shift'ed meanwhile) */
+        window.addEventListener("focus", detectKbLayout);
+
+        /* Fallback (Firefox / Safari / mobile, no layout map):
+           infer from the characters actually typed. */
+        document.addEventListener("keydown", function (ev) {
+          if (kbFromLayout) return;
+          if (!ev.key || ev.key.length !== 1) return;
+          if (/[\u0E00-\u0E7F]/.test(ev.key)) setKbLang("th");
+          else if (/[a-zA-Z]/.test(ev.key)) setKbLang("en");
+        });
 
         /* ---------- Init ---------- */
         reset(pickPassage(lang));
