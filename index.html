@@ -1,0 +1,719 @@
+<!doctype html>
+<html lang="th">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="color-scheme" content="light dark" />
+    <link rel="icon" href="data:," />
+    <title>Typing Speed Test — วัดความเร็วพิมพ์ ไทย / อังกฤษ</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+    <style>
+      :root{
+        --bg:#f4f1ea;
+        --bg-soft:#ebe6db;
+        --card:#fffdf8;
+        --card-2:#f8f4ec;
+        --ink:#1c1917;
+        --ink-2:#57534e;
+        --ink-3:#a8a29e;
+        --line:#e2ddd2;
+        --accent:#0f766e;
+        --accent-ink:#0b5f59;
+        --accent-soft:#d7efec;
+        --accent-soft-2:#e6f4f1;
+        --good:#0f766e;
+        --bad:#dc2626;
+        --bad-soft:#fde8e8;
+        --warn:#b45309;
+        --shadow:0 1px 2px rgba(28,25,23,.05),0 12px 32px -16px rgba(28,25,23,.18);
+        --radius:18px;
+      }
+      @media (prefers-color-scheme: dark){
+        :root{
+          --bg:#12140f;
+          --bg-soft:#1a1d17;
+          --card:#1c1f1a;
+          --card-2:#23261f;
+          --ink:#f0ede6;
+          --ink-2:#b8b2a6;
+          --ink-3:#6f6a5e;
+          --line:#2e322a;
+          --accent:#2dd4bf;
+          --accent-ink:#5eead4;
+          --accent-soft:#123a36;
+          --accent-soft-2:#17302c;
+          --good:#2dd4bf;
+          --bad:#f87171;
+          --bad-soft:#3d1d1d;
+          --warn:#fbbf24;
+          --shadow:0 1px 2px rgba(0,0,0,.3),0 12px 32px -16px rgba(0,0,0,.5);
+        }
+      }
+      *{box-sizing:border-box}
+      html{-webkit-text-size-adjust:100%}
+      body{
+        margin:0;
+        background:var(--bg);
+        color:var(--ink);
+        font-family:"Sarabun",system-ui,-apple-system,"Segoe UI",sans-serif;
+        line-height:1.5;
+      }
+      button{font:inherit;cursor:pointer}
+      .wrap{max-width:980px;margin:0 auto;padding:22px 16px 48px}
+      @media (min-width:720px){ .wrap{padding:34px 24px 64px} }
+
+      /* ---------- Heading ---------- */
+      .eyebrow{
+        display:inline-flex;align-items:center;gap:8px;
+        font-family:"JetBrains Mono",monospace;font-size:12px;font-weight:600;
+        letter-spacing:.14em;text-transform:uppercase;color:var(--accent-ink);
+        background:var(--accent-soft-2);border:1px solid var(--line);
+        padding:6px 10px;border-radius:999px;
+      }
+      .eyebrow i{width:7px;height:7px;border-radius:50%;background:var(--accent);display:inline-block}
+      h1{
+        margin:14px 0 6px;font-size:clamp(30px,5.2vw,46px);line-height:1.08;font-weight:800;letter-spacing:-.02em;
+      }
+      h1 .thin{color:var(--ink-2);font-weight:600}
+      .lede{margin:0;max-width:62ch;color:var(--ink-2);font-size:16.5px}
+      .lede strong{color:var(--ink)}
+
+      /* ---------- Controls ---------- */
+      .controls{
+        margin-top:22px;display:flex;flex-wrap:wrap;gap:10px 14px;align-items:flex-end;
+      }
+      .ctl-group{display:flex;flex-direction:column;gap:6px}
+      .ctl-label{font-size:12.5px;font-weight:700;letter-spacing:.04em;color:var(--ink-2)}
+      .seg{
+        display:inline-flex;background:var(--card);border:1px solid var(--line);
+        border-radius:999px;padding:4px;gap:2px;box-shadow:var(--shadow);
+      }
+      .seg button{
+        border:0;background:transparent;color:var(--ink-2);
+        padding:8px 14px;border-radius:999px;font-weight:700;font-size:14.5px;
+        display:inline-flex;align-items:center;gap:7px;white-space:nowrap;
+      }
+      .seg button .sub{font-family:"JetBrains Mono",monospace;font-size:11px;font-weight:600;opacity:.75}
+      .seg button[aria-pressed="true"]{background:var(--ink);color:var(--bg)}
+      @media (prefers-color-scheme: dark){ .seg button[aria-pressed="true"]{background:var(--ink);color:#12140f} }
+      .seg button:focus-visible,.btn:focus-visible,.type-card:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+      /* ---------- Live stats strip ---------- */
+      .stats{
+        margin-top:16px;display:grid;grid-template-columns:repeat(4,1fr);gap:10px;
+      }
+      @media (max-width:560px){ .stats{grid-template-columns:repeat(2,1fr)} }
+      .stat{
+        background:var(--card);border:1px solid var(--line);border-radius:14px;
+        padding:12px 14px 10px;box-shadow:var(--shadow);
+      }
+      .stat .k{font-size:12px;font-weight:700;color:var(--ink-2);letter-spacing:.03em;display:flex;align-items:center;gap:6px}
+      .stat .v{font-family:"JetBrains Mono",monospace;font-size:clamp(24px,3.4vw,32px);font-weight:800;line-height:1.1;margin-top:2px;font-variant-numeric:tabular-nums}
+      .stat .v small{font-size:13px;font-weight:600;color:var(--ink-3)}
+      .stat .v.hot{color:var(--accent-ink)}
+      .progress{height:5px;background:var(--bg-soft);border-radius:99px;margin-top:16px;overflow:hidden}
+      .progress > div{height:100%;width:0%;background:var(--accent);border-radius:99px;transition:width .25s linear}
+
+      /* ---------- Typing card ---------- */
+      .type-card{
+        position:relative;margin-top:12px;background:var(--card);
+        border:1px solid var(--line);border-radius:var(--radius);
+        box-shadow:var(--shadow);padding:22px 20px 16px;cursor:text;
+      }
+      @media (min-width:720px){ .type-card{padding:28px 30px 20px} }
+      .type-card.focused{border-color:var(--accent)}
+      .passage{
+        --lh:2.05;
+        font-size:clamp(19px,2.6vw,23.5px);
+        line-height:var(--lh);
+        height:calc(1em * var(--lh) * 3 + 6px);
+        overflow:hidden;
+        color:var(--ink-3);
+        word-break:break-word;
+        user-select:none;
+        scroll-behavior:smooth;
+      }
+      .passage.lang-en{font-family:"JetBrains Mono",monospace;font-size:clamp(17px,2.3vw,20.5px);letter-spacing:-.01em}
+      .passage.lang-th{font-family:"Sarabun",sans-serif;font-weight:500}
+      .char{position:relative;border-radius:3px}
+      .char.ok{color:var(--good)}
+      .char.bad{color:var(--bad);background:var(--bad-soft)}
+      .char.bad-space{background:var(--bad-soft)}
+      .char.current{background:var(--accent-soft)}
+      .char.current::before{
+        content:"";position:absolute;left:-1px;top:12%;height:76%;width:2.5px;border-radius:2px;
+        background:var(--accent);animation:blink 1.05s steps(1) infinite;
+      }
+      @keyframes blink{0%,55%{opacity:1}56%,100%{opacity:0}}
+      @media (prefers-reduced-motion: reduce){ .char.current::before{animation:none} .passage{scroll-behavior:auto} }
+      .type-foot{
+        display:flex;flex-wrap:wrap;gap:8px 14px;align-items:center;justify-content:space-between;
+        margin-top:14px;padding-top:13px;border-top:1px dashed var(--line);
+      }
+      .hint{font-size:13.5px;color:var(--ink-2);display:flex;align-items:center;gap:8px}
+      .hint .dot{width:8px;height:8px;border-radius:50%;background:var(--ink-3);flex:none}
+      .hint.live .dot{background:var(--accent)}
+      .actions{display:flex;gap:8px;flex-wrap:wrap}
+      .btn{
+        border:1px solid var(--line);background:var(--card-2);color:var(--ink);
+        border-radius:999px;padding:9px 16px;font-weight:700;font-size:14px;
+        display:inline-flex;align-items:center;gap:8px;
+      }
+      .btn:hover{border-color:var(--ink-3)}
+      .btn.primary{background:var(--accent);border-color:var(--accent);color:#fff}
+      @media (prefers-color-scheme: dark){ .btn.primary{color:#06231f} }
+      .btn svg{width:15px;height:15px;flex:none}
+      /* Visible typing field: tapping it summons the mobile keyboard,
+         and the passage above highlights in sync as you type. */
+      #typer{
+        display:block;width:100%;height:46px;margin-top:16px;
+        background:var(--card-2);border:1px solid var(--line);border-radius:12px;
+        padding:11px 14px;font-size:16px;font-family:inherit;color:var(--ink-2);
+        caret-color:var(--accent);resize:none;overflow:hidden;white-space:nowrap;
+      }
+      #typer::placeholder{color:var(--ink-3)}
+      #typer:focus{outline:2px solid var(--accent);outline-offset:1px;border-color:var(--accent)}
+
+      /* ---------- Results ---------- */
+      .results{display:none;margin-top:16px;background:var(--card);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:22px 20px}
+      .results.show{display:block}
+      @media (min-width:720px){ .results{padding:26px 30px} }
+      .res-head{display:flex;flex-wrap:wrap;gap:6px 14px;align-items:baseline;justify-content:space-between}
+      .res-head h2{margin:0;font-size:21px;font-weight:800}
+      .res-meta{font-family:"JetBrains Mono",monospace;font-size:12.5px;color:var(--ink-2)}
+      .badge-new{
+        display:none;background:var(--accent);color:#fff;font-size:12.5px;font-weight:800;
+        padding:4px 10px;border-radius:999px;
+      }
+      @media (prefers-color-scheme: dark){ .badge-new{color:#06231f} }
+      .badge-new.show{display:inline-block}
+      .res-main{display:flex;flex-wrap:wrap;gap:18px 34px;align-items:flex-end;margin-top:14px}
+      .big-wpm{font-family:"JetBrains Mono",monospace;line-height:.95}
+      .big-wpm .num{font-size:clamp(64px,11vw,96px);font-weight:800;letter-spacing:-.03em;color:var(--accent-ink)}
+      .big-wpm .unit{font-size:18px;font-weight:700;color:var(--ink-2);margin-left:6px}
+      .verdict{max-width:34ch}
+      .verdict .grade{font-size:19px;font-weight:800}
+      .verdict p{margin:3px 0 0;color:var(--ink-2);font-size:14.5px}
+      .bench{margin-top:16px}
+      .bench-track{position:relative;height:12px;background:var(--bg-soft);border-radius:99px}
+      .bench-fill{position:absolute;left:0;top:0;bottom:0;background:var(--accent);border-radius:99px;min-width:12px;transition:width .5s ease}
+      .bench-avg{position:absolute;top:-4px;bottom:-4px;width:2px;background:var(--ink)}
+      .bench-labels{display:flex;justify-content:space-between;font-size:12px;color:var(--ink-2);margin-top:6px;font-family:"JetBrains Mono",monospace}
+      .res-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-top:18px}
+      @media (min-width:640px){ .res-grid{grid-template-columns:repeat(4,1fr)} }
+      .res-cell{background:var(--card-2);border:1px solid var(--line);border-radius:12px;padding:11px 13px}
+      .res-cell .k{font-size:12px;font-weight:700;color:var(--ink-2)}
+      .res-cell .v{font-family:"JetBrains Mono",monospace;font-size:21px;font-weight:800;margin-top:1px;font-variant-numeric:tabular-nums}
+      .res-cell .v small{font-size:12px;color:var(--ink-3);font-weight:600}
+      .res-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:18px}
+
+      /* ---------- History + how ---------- */
+      .lower{display:grid;gap:16px;margin-top:16px}
+      @media (min-width:820px){ .lower{grid-template-columns:1.35fr 1fr} }
+      .panel{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:18px 20px}
+      .panel h3{margin:0 0 4px;font-size:16px;font-weight:800}
+      .panel .sub{font-size:13.5px;color:var(--ink-2);margin:0 0 10px}
+      .hist-empty{color:var(--ink-3);font-size:14.5px;padding:10px 0 4px}
+      table{width:100%;border-collapse:collapse;font-size:14px}
+      th{ text-align:left;font-size:12px;color:var(--ink-2);letter-spacing:.03em;padding:6px 8px 6px 0;border-bottom:1px solid var(--line)}
+      td{padding:8px 8px 8px 0;border-bottom:1px solid var(--line);font-variant-numeric:tabular-nums}
+      td.num,th.num{font-family:"JetBrains Mono",monospace;text-align:right;padding-right:0}
+      th.num{text-align:right}
+      tr:last-child td{border-bottom:0}
+      .tag{display:inline-block;font-size:11.5px;font-weight:800;padding:2px 8px;border-radius:999px;background:var(--accent-soft-2);color:var(--accent-ink);border:1px solid var(--line)}
+      .how p{font-size:14px;color:var(--ink-2);margin:0 0 9px}
+      .how p:last-child{margin-bottom:0}
+      .how code{font-family:"JetBrains Mono",monospace;font-size:12.5px;background:var(--card-2);border:1px solid var(--line);border-radius:6px;padding:1px 6px;color:var(--ink)}
+      .how strong{color:var(--ink)}
+      footer{margin-top:22px;font-size:13px;color:var(--ink-3);text-align:center}
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <span class="eyebrow"><i></i> Typing Speed Test</span>
+      <h1>พิมพ์เร็วแค่ไหน<br /><span class="thin">วัดกันให้เห็นตัวเลขจริง</span></h1>
+      <p class="lede">เลือกภาษาและเวลา แล้วเริ่มพิมพ์ตามข้อความ — นาฬิกาจะเริ่มเดินตั้งแต่ตัวอักษรแรก ผลจะออกมาเป็น <strong>WPM (คำต่อนาที)</strong> พร้อมความแม่นยำ เหมาะไว้ตอบตอนสัมภาษณ์งานหรือแค่อยากรู้ว่านิ้วตัวเองเร็วระดับไหน</p>
+
+      <!-- Controls -->
+      <div class="controls" role="group" aria-label="ตั้งค่าการทดสอบ">
+        <div class="ctl-group">
+          <span class="ctl-label">ภาษา</span>
+          <div class="seg" id="langSeg">
+            <button type="button" data-lang="th" aria-pressed="true">ภาษาไทย <span class="sub">TH</span></button>
+            <button type="button" data-lang="en" aria-pressed="false">English <span class="sub">EN</span></button>
+          </div>
+        </div>
+        <div class="ctl-group">
+          <span class="ctl-label">ระยะเวลา</span>
+          <div class="seg" id="durSeg">
+            <button type="button" data-dur="15" aria-pressed="false">15 วิ</button>
+            <button type="button" data-dur="30" aria-pressed="false">30 วิ</button>
+            <button type="button" data-dur="60" aria-pressed="true">60 วิ</button>
+            <button type="button" data-dur="120" aria-pressed="false">120 วิ</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Live stats -->
+      <div class="stats" aria-live="off">
+        <div class="stat">
+          <div class="k">เวลาที่เหลือ</div>
+          <div class="v" id="statTime">60<small> วิ</small></div>
+        </div>
+        <div class="stat">
+          <div class="k">ความเร็ว</div>
+          <div class="v hot" id="statWpm">0<small> WPM</small></div>
+        </div>
+        <div class="stat">
+          <div class="k">ความแม่นยำ</div>
+          <div class="v" id="statAcc">100<small> %</small></div>
+        </div>
+        <div class="stat">
+          <div class="k">ตัวอักษรที่ถูก</div>
+          <div class="v" id="statChars">0<small> ตัว</small></div>
+        </div>
+      </div>
+      <div class="progress" aria-hidden="true"><div id="progressBar"></div></div>
+
+      <!-- Typing card -->
+      <div class="type-card" id="typeCard">
+        <div class="passage lang-th" id="passage"></div>
+        <textarea id="typer" rows="1" wrap="off" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" aria-label="ช่องพิมพ์ — พิมพ์ตามข้อความด้านบน" placeholder="แตะช่องนี้ แล้วพิมพ์ตามข้อความด้านบนได้เลย…"></textarea>
+        <div class="type-foot">
+          <span class="hint" id="hint"><span class="dot"></span><span id="hintText">คลิกที่กล่องนี้ แล้วเริ่มพิมพ์ได้เลย — นาฬิกาเริ่มเมื่อพิมพ์ตัวแรก</span></span>
+          <div class="actions">
+            <button class="btn" id="btnRestart" type="button">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v5h5"/></svg>
+              เริ่มใหม่ (ข้อความเดิม)
+            </button>
+            <button class="btn" id="btnNew" type="button">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 3h5v5"/><path d="M4 20 21 3"/><path d="M21 16v5h-5"/><path d="m15 15 6 6"/><path d="M4 4l5 5"/></svg>
+              สุ่มข้อความใหม่
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Results -->
+      <section class="results" id="results" aria-live="polite">
+        <div class="res-head">
+          <h2>ผลการทดสอบ</h2>
+          <span class="badge-new" id="badgeNew">สถิติใหม่ของรอบนี้</span>
+          <span class="res-meta" id="resMeta"></span>
+        </div>
+        <div class="res-main">
+          <div class="big-wpm"><span class="num" id="resWpm">0</span><span class="unit">WPM</span></div>
+          <div class="verdict">
+            <div class="grade" id="resGrade"></div>
+            <p id="resVerdict"></p>
+          </div>
+        </div>
+        <div class="bench">
+          <div class="bench-track">
+            <div class="bench-fill" id="benchFill"></div>
+            <div class="bench-avg" id="benchAvg"></div>
+          </div>
+          <div class="bench-labels"><span>0</span><span id="benchAvgLabel"></span><span id="benchMaxLabel"></span></div>
+        </div>
+        <div class="res-grid">
+          <div class="res-cell"><div class="k">ความแม่นยำ</div><div class="v" id="resAcc">–</div></div>
+          <div class="res-cell"><div class="k">ความเร็วรวม (ก่อนหักผิด)</div><div class="v" id="resRaw">–</div></div>
+          <div class="res-cell"><div class="k">ตัวอักษรถูก / ผิด</div><div class="v" id="resChars">–</div></div>
+          <div class="res-cell"><div class="k">ความสม่ำเสมอ</div><div class="v" id="resCons">–</div></div>
+        </div>
+        <div class="res-actions">
+          <button class="btn primary" id="btnAgain" type="button">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v5h5"/></svg>
+            ลองอีกครั้ง
+          </button>
+          <button class="btn" id="btnAgainNew" type="button">เปลี่ยนข้อความแล้วลองใหม่</button>
+        </div>
+      </section>
+
+      <div class="lower">
+        <!-- History -->
+        <section class="panel">
+          <h3>ผลรอบก่อนหน้า</h3>
+          <p class="sub">เก็บไว้เฉพาะระหว่างที่เปิดหน้านี้อยู่ — ปิดหน้าแล้วเริ่มนับใหม่</p>
+          <div class="hist-empty" id="histEmpty">ยังไม่มีผล — ทำแบบทดสอบครั้งแรกให้จบก่อน ผลจะมาโผล่ตรงนี้</div>
+          <table id="histTable" style="display:none">
+            <thead>
+              <tr><th>รอบ</th><th>โหมด</th><th class="num">WPM</th><th class="num">แม่นยำ</th><th class="num">ถูก/ผิด</th></tr>
+            </thead>
+            <tbody id="histBody"></tbody>
+          </table>
+        </section>
+
+        <!-- How it works -->
+        <section class="panel how">
+          <h3>คะแนนคิดยังไง</h3>
+          <p><strong>WPM</strong> ใช้สูตรมาตรฐานสากล <code>WPM = (ตัวอักษรที่ถูก ÷ 5) ÷ นาที</code> — เลข 5 คือความยาวเฉลี่ยของ 1 คำรวมช่องว่าง จึงเทียบกับเว็บวัดความเร็วอื่นได้ตรง ๆ</p>
+          <p><strong>ภาษาไทย</strong> นับเป็น “อักขระ” (ตัวอักษรรวมสระและวรรณยุกต์ที่ติดกันนับเป็น 1) แล้วใช้สูตรเดียวกัน ค่าเฉลี่ยคนทั่วไปอยู่ราว 25–35 WPM ส่วนภาษาอังกฤษราว 40 WPM — โปรแกรมเมอร์ที่พิมพ์ทุกวันมักอยู่สูงกว่านี้ชัดเจน</p>
+          <p><strong>ความสม่ำเสมอ</strong> วัดจากความแกว่งของความเร็วในแต่ละช่วงของรอบนั้น ยิ่งใกล้ 100% แปลว่านิ้วเดินจังหวะนิ่ง ไม่ใช่แค่พุ่งช่วงแรกแล้วแผ่ว</p>
+        </section>
+      </div>
+
+      <footer>พิมพ์ผิดไม่ต้องตกใจ — กด Backspace แก้ได้ตลอดระหว่างที่เวลายังไม่หมด</footer>
+    </div>
+
+    <script>
+      (function () {
+        "use strict";
+
+        var PASSAGES = {
+          en: [
+            "Good code is not written by accident. It is the result of clear thinking, careful naming, and the discipline to remove what is not needed. A programmer reads far more code than she writes, so clarity always wins over cleverness. When a function does one thing well, it becomes easy to test, easy to change, and easy to understand months later, when the original context has faded from memory.",
+            "Learning to type quickly is a quiet superpower. Your hands keep up with your thoughts, ideas flow onto the screen without friction, and the gap between imagining a solution and seeing it work becomes smaller every day. Speed alone is not enough, though. Accuracy matters just as much, because every mistake costs time to find and fix. The fastest typists are not reckless; they are calm, steady, and precise.",
+            "On a rainy morning in the city, people hurried through the streets with umbrellas in hand, dodging puddles and watching for the next train. The coffee shop on the corner was warm and crowded, filled with the sound of cups, quiet conversation, and laptops opening one by one. Outside, the traffic moved slowly, but inside, the day had already begun with plans, lists, and the promise of getting things done.",
+            "The best teams build software the way good cooks run a kitchen. Everyone knows their station, the tools are sharp and ready, and nothing leaves the pass until it has been tasted. Mistakes still happen, of course, but they are caught early, discussed openly, and turned into lessons. Over time, this habit creates trust, and trust is what allows a group of individuals to move fast without breaking everything.",
+            "A few decades ago, sending a letter across the world took weeks, and a phone call to another continent cost a small fortune. Today a message crosses the planet in less than a second, and video calls feel as ordinary as talking across a table. Technology changed the distance between people, but it did not change what people want: to be heard, to be understood, and to feel a little less alone in a very large world.",
+            "Debugging is twice as hard as writing the code in the first place. Therefore, if you write the code as cleverly as possible, you are, by definition, not smart enough to debug it. This is why experienced engineers prefer boring solutions that work over brilliant ones that surprise them at three in the morning. Simple code, honest names, and small steps beat genius almost every single time."
+          ],
+          th: [
+            "การเขียนโปรแกรมที่ดีไม่ได้เกิดขึ้นโดยบังเอิญ แต่เกิดจากความคิดที่ชัดเจน การตั้งชื่อที่สื่อความหมาย และวินัยในการตัดสิ่งที่ไม่จำเป็นออกไป โปรแกรมเมอร์ต้องอ่านโค้ดมากกว่าที่เขียนหลายเท่า ดังนั้นความชัดเจนจึงสำคัญกว่าความฉลาดที่เข้าใจยาก เมื่อฟังก์ชันหนึ่งทำหน้าที่เดียวได้ดี มันก็จะทดสอบง่าย แก้ไขง่าย และเข้าใจได้แม้เวลาจะผ่านไปนานแล้วก็ตาม",
+            "การพิมพ์เร็วเป็นทักษะที่ดูเงียบ ๆ แต่ทรงพลังมาก เมื่อนิ้วมือตามความคิดทัน ไอเดียก็ไหลลงหน้าจอได้โดยไม่สะดุด ช่องว่างระหว่างการจินตนาการถึงคำตอบกับการเห็นมันทำงานจริงก็สั้นลงทุกวัน อย่างไรก็ตาม ความเร็วอย่างเดียวไม่เพียงพอ ความแม่นยำก็สำคัญไม่แพ้กัน เพราะทุกความผิดพลาดต้องใช้เวลาในการค้นหาและแก้ไข คนที่พิมพ์เร็วที่สุดจึงไม่ใช่คนที่รีบร้อน แต่เป็นคนที่นิ่ง สม่ำเสมอ และแม่นยำ",
+            "ในเช้าวันฝนตกของเมืองใหญ่ ผู้คนเร่งรีบเดินไปตามถนนพร้อมร่มในมือ หลบหลีกแอ่งน้ำและมองหารถไฟขบวนถัดไป ร้านกาแฟตรงหัวมุมถนนอบอุ่นและแน่นขนัด เต็มไปด้วยเสียงถ้วยแก้ว บทสนทนาเบา ๆ และเสียงเปิดแล็ปท็อปทีละเครื่อง ข้างนอกการจราจรเคลื่อนตัวช้า แต่ข้างใน วันใหม่ได้เริ่มต้นขึ้นแล้วพร้อมแผนงาน รายการสิ่งที่ต้องทำ และความตั้งใจที่จะทำให้ทุกอย่างสำเร็จ",
+            "ทีมที่ดีสร้างซอฟต์แวร์เหมือนครัวที่ดีของร้านอาหาร ทุกคนรู้หน้าที่ของตัวเอง เครื่องมือพร้อมใช้งาน และไม่มีจานไหนออกจากครัวโดยไม่ผ่านการชิม ความผิดพลาดยังคงเกิดขึ้นได้เสมอ แต่จะถูกพบตั้งแต่เนิ่น ๆ พูดคุยกันอย่างเปิดเผย และเปลี่ยนให้เป็นบทเรียน เมื่อเวลาผ่านไป นิสัยแบบนี้จะสร้างความไว้ใจ และความไว้ใจนี่เองที่ทำให้คนกลุ่มหนึ่งเคลื่อนตัวได้เร็วโดยไม่ทำทุกอย่างพังลง",
+            "หลายคนหลงรักญี่ปุ่นเพราะความใส่ใจในรายละเอียด ตั้งแต่รถไฟที่มาตรงเวลา อาหารที่จัดวางอย่างประณีต ไปจนถึงถนนหนทางที่สะอาดและเป็นระเบียบ การเดินเล่นในย่านเก่าของเกียวโตหรือการนั่งรถไฟชมวิวภูเขาไฟฟูจิ ล้วนเป็นประสบการณ์ที่ทำให้ผู้มาเยือนอยากกลับไปอีกครั้ง ประเทศนี้ผสมผสานความทันสมัยเข้ากับวัฒนธรรมดั้งเดิมได้อย่างลงตัวในแบบที่หาได้ยากจากที่อื่น",
+            "ผัดกะเพราที่อร่อยต้องเริ่มจากกระทะที่ร้อนจัดและไฟที่แรงพอ ใส่กระเทียมกับพริกลงไปผัดจนหอม ตามด้วยเนื้อสัตว์ที่หั่นพอดีคำ ปรุงรสให้เค็มหวานกลมกล่อม แล้วปิดท้ายด้วยใบกะเพราสดที่ใส่ตอนสุดท้ายก่อนยกขึ้นจากเตา เสิร์ฟบนข้าวสวยร้อน ๆ พร้อมไข่ดาวขอบกรอบ เพียงเท่านี้ก็เป็นมื้อธรรมดาที่ไม่ธรรมดา และเป็นรสชาติที่หลายคนนึกถึงทุกครั้งที่หิว"
+          ]
+        };
+
+        var BENCH = {
+          en: { avg: 40, max: 120, label: "ค่าเฉลี่ยทั่วไป ≈ 40 WPM" },
+          th: { avg: 30, max: 90, label: "ค่าเฉลี่ยทั่วไป ≈ 30 WPM" }
+        };
+
+        function verdictFor(lang, wpm) {
+          if (lang === "en") {
+            if (wpm >= 90) return ["ระดับเทพ", "เร็วกว่าโปรแกรมเมอร์ส่วนใหญ่ไปไกลมาก ตัวเลขนี้เอาไปใส่ resume ได้เลยแบบไม่ต้องอายใคร"];
+            if (wpm >= 70) return ["เร็วมาก", "นิ้วระดับนี้คือผลจากการพิมพ์โค้ดทุกวันมาหลายปี ชัดเจนว่าเร็วกว่าค่าเฉลี่ยเยอะ"];
+            if (wpm >= 55) return ["เร็ว", "สูงกว่าค่าเฉลี่ยทั่วไปพอสมควร เป็นความเร็วที่ใช้งานจริงได้สบายมาก"];
+            if (wpm >= 40) return ["ปานกลางค่อนเร็ว", "เท่าค่าเฉลี่ยคนทั่วไปแล้ว ลองอีกรอบตอนวอร์มนิ้วแล้ว ตัวเลขน่าจะขยับขึ้นอีก"];
+            if (wpm >= 25) return ["ปานกลาง", "ฐานดีอยู่แล้ว ฝึกจับจังหวะให้สม่ำเสมออีกนิดจะเร็วขึ้นไวมาก"];
+            return ["กำลังพัฒนา", "อย่าเพิ่งเทียบกับใคร เทียบกับรอบต่อไปของตัวเองก็พอ — ส่วนใหญ่รอบที่สองจะดีขึ้นทันที"];
+          }
+          if (wpm >= 60) return ["ระดับเทพ", "ภาษาไทยระดับนี้หาได้ยากมาก แปลว่านิ้วจำแป้นไทยได้แม่นสุด ๆ"];
+          if (wpm >= 45) return ["เร็วมาก", "เร็วกว่าคนไทยทั่วไปชัดเจนมาก ผลจากการพิมพ์งานทุกวันเห็นผลตรงนี้เลย"];
+          if (wpm >= 35) return ["เร็ว", "สูงกว่าค่าเฉลี่ยภาษาไทยแล้ว เป็นความเร็วที่ทำงานจริงได้คล่องมาก"];
+          if (wpm >= 25) return ["ปานกลางค่อนดี", "ใกล้ค่าเฉลี่ยทั่วไป ลองอีกรอบตอนนิ้ววอร์มแล้วน่าจะทะลุค่าเฉลี่ยสบาย ๆ"];
+          if (wpm >= 15) return ["กำลังพัฒนา", "ฐานมาแล้ว เหลือแค่ความคุ้นกับตำแหน่งสระและวรรณยุกต์ ฝึกอีกไม่กี่รอบก็พุ่ง"];
+          return ["เพิ่งเริ่มต้น", "แป้นไทยต้องใช้เวลาทำความคุ้นเคยมากกว่าอังกฤษเป็นปกติ ลองรอบสั้น 30 วิเพื่อวอร์มก่อนก็ได้"];
+        }
+
+        /* Grapheme splitting: keeps Thai base letters + combining marks together */
+        var segmenter = null;
+        try {
+          if (typeof Intl !== "undefined" && Intl.Segmenter) {
+            segmenter = new Intl.Segmenter(undefined, { granularity: "grapheme" });
+          }
+        } catch (e) { segmenter = null; }
+        function toGraphemes(str) {
+          if (segmenter) {
+            var out = [];
+            var it = segmenter.segment(str);
+            for (var seg of it) out.push(seg.segment);
+            return out;
+          }
+          return Array.from(str);
+        }
+
+        /* ---------- State ---------- */
+        var lang = "th";
+        var duration = 60;
+        var target = [];        // graphemes of current passage (grows as needed)
+        var typed = [];         // graphemes typed so far
+        var correctFlags = [];  // per-index correctness for typed
+        var started = false;
+        var finished = false;
+        var startTime = 0;
+        var timerId = null;
+        var samples = [];       // {t: seconds elapsed, correct: correctChars} for consistency
+        var lastSampleSec = -1;
+        var passageIdx = { th: -1, en: -1 };
+        var history = [];       // finished tests this session
+        var bestByKey = {};     // "th-60" -> best wpm
+
+        /* ---------- Elements ---------- */
+        function $(id) { return document.getElementById(id); }
+        var passageEl = $("passage"), typerEl = $("typer"), cardEl = $("typeCard");
+        var statTime = $("statTime"), statWpm = $("statWpm"), statAcc = $("statAcc"), statChars = $("statChars");
+        var progressBar = $("progressBar"), hintEl = $("hint"), hintText = $("hintText");
+        var resultsEl = $("results");
+
+        function pickPassage(l) {
+          var arr = PASSAGES[l];
+          var idx;
+          do { idx = Math.floor(Math.random() * arr.length); } while (arr.length > 1 && idx === passageIdx[l]);
+          passageIdx[l] = idx;
+          return arr[idx];
+        }
+
+        function buildPassage(text) {
+          target = toGraphemes(text);
+          passageEl.innerHTML = "";
+          var frag = document.createDocumentFragment();
+          for (var i = 0; i < target.length; i++) {
+            var s = document.createElement("span");
+            s.className = "char";
+            s.textContent = target[i];
+            frag.appendChild(s);
+          }
+          passageEl.appendChild(frag);
+          passageEl.scrollTop = 0;
+        }
+
+        function extendPassage() {
+          var extra = " " + pickPassage(lang);
+          var g = toGraphemes(extra);
+          var frag = document.createDocumentFragment();
+          for (var i = 0; i < g.length; i++) {
+            var s = document.createElement("span");
+            s.className = "char";
+            s.textContent = g[i];
+            frag.appendChild(s);
+          }
+          passageEl.appendChild(frag);
+          target = target.concat(g);
+        }
+
+        function reset(testText) {
+          if (timerId) { clearInterval(timerId); timerId = null; }
+          started = false; finished = false;
+          typed = []; correctFlags = []; samples = []; lastSampleSec = -1;
+          typerEl.value = "";
+          buildPassage(testText);
+          passageEl.className = "passage lang-" + lang;
+          resultsEl.classList.remove("show");
+          hintEl.classList.remove("live");
+          hintText.textContent = "คลิกที่กล่องนี้ แล้วเริ่มพิมพ์ได้เลย — นาฬิกาเริ่มเมื่อพิมพ์ตัวแรก";
+          updateStats(0);
+          markCurrent();
+        }
+
+        function markCurrent() {
+          var spans = passageEl.children;
+          for (var i = 0; i < spans.length; i++) {
+            var cls = "char";
+            if (i < typed.length) cls += correctFlags[i] ? " ok" : (" bad" + (target[i] === " " ? " bad-space" : ""));
+            if (i === typed.length && !finished) cls += " current";
+            if (spans[i].className !== cls) spans[i].className = cls;
+          }
+          scrollToCurrent();
+        }
+
+        function scrollToCurrent() {
+          var cur = passageEl.children[typed.length];
+          if (!cur) return;
+          var lh = parseFloat(getComputedStyle(passageEl).lineHeight) || 48;
+          var desired = cur.offsetTop - lh; // keep current char on the middle line
+          if (desired < 0) desired = 0;
+          if (Math.abs(passageEl.scrollTop - desired) > 2) passageEl.scrollTop = desired;
+        }
+
+        function elapsedSec() {
+          if (!started) return 0;
+          var e = (Date.now() - startTime) / 1000;
+          return Math.min(e, duration);
+        }
+
+        function countCorrect() {
+          var c = 0;
+          for (var i = 0; i < correctFlags.length; i++) if (correctFlags[i]) c++;
+          return c;
+        }
+
+        function updateStats(elapsed) {
+          var e = (typeof elapsed === "number") ? elapsed : elapsedSec();
+          var correct = countCorrect();
+          var total = typed.length;
+          var mins = e / 60;
+          var wpm = mins > 0 ? Math.round((correct / 5) / mins) : 0;
+          var acc = total > 0 ? Math.round((correct / total) * 100) : 100;
+          var remain = Math.max(0, Math.ceil(duration - e));
+          statTime.innerHTML = remain + "<small> วิ</small>";
+          statWpm.innerHTML = wpm + "<small> WPM</small>";
+          statAcc.innerHTML = acc + "<small> %</small>";
+          statChars.innerHTML = correct + "<small> ตัว</small>";
+          progressBar.style.width = (duration > 0 ? (e / duration) * 100 : 0) + "%";
+          return { wpm: wpm, acc: acc, correct: correct, total: total };
+        }
+
+        function tick() {
+          var e = elapsedSec();
+          var sec = Math.floor(e);
+          if (sec !== lastSampleSec) {
+            lastSampleSec = sec;
+            samples.push({ t: e, correct: countCorrect() });
+          }
+          updateStats(e);
+          if (e >= duration) finish();
+        }
+
+        function startTimer() {
+          started = true;
+          startTime = Date.now();
+          hintEl.classList.add("live");
+          hintText.textContent = "กำลังจับเวลา… พิมพ์ต่อไปเรื่อย ๆ ผิดก็กด Backspace แก้ได้";
+          timerId = setInterval(tick, 100);
+        }
+
+        function onInput() {
+          if (finished) { typerEl.value = typed.join(""); return; }
+          var val = typerEl.value;
+          var g = toGraphemes(val);
+          /* If the passage is nearly exhausted, append more text */
+          while (g.length > target.length - 40) extendPassage();
+          if (g.length > target.length) { g = g.slice(0, target.length); }
+          typed = g;
+          correctFlags = [];
+          for (var i = 0; i < typed.length; i++) correctFlags.push(typed[i] === target[i]);
+          if (!started && typed.length > 0) startTimer();
+          if (started) {
+            updateStats();
+            /* If the tab was backgrounded and the interval was throttled,
+               still end the test on the next keystroke past the limit. */
+            if (elapsedSec() >= duration) finish();
+          }
+          markCurrent();
+        }
+
+        function consistency() {
+          if (samples.length < 3) return null;
+          var rates = [];
+          for (var i = 1; i < samples.length; i++) {
+            var dt = samples[i].t - samples[i - 1].t;
+            var dc = samples[i].correct - samples[i - 1].correct;
+            if (dt > 0) rates.push((dc / 5) / (dt / 60));
+          }
+          if (rates.length < 2) return null;
+          var mean = rates.reduce(function (a, b) { return a + b; }, 0) / rates.length;
+          if (mean <= 0) return 0;
+          var varSum = rates.reduce(function (a, b) { return a + Math.pow(b - mean, 2); }, 0) / rates.length;
+          var cv = Math.sqrt(varSum) / mean;
+          return Math.max(0, Math.min(100, Math.round(100 - cv * 100)));
+        }
+
+        function finish() {
+          if (finished) return;
+          finished = true;
+          if (timerId) { clearInterval(timerId); timerId = null; }
+          typerEl.blur();
+          var e = duration; // full duration used
+          var correct = countCorrect();
+          var total = typed.length;
+          var wrong = total - correct;
+          var mins = e / 60;
+          var wpm = Math.round((correct / 5) / mins);
+          var raw = Math.round((total / 5) / mins);
+          var acc = total > 0 ? Math.round((correct / total) * 100) : 100;
+          var cons = consistency();
+          updateStats(e);
+          markCurrent();
+          hintEl.classList.remove("live");
+          hintText.textContent = "หมดเวลา — ดูผลด้านล่าง หรือกดเริ่มใหม่เพื่อลองอีกครั้ง";
+
+          var v = verdictFor(lang, wpm);
+          $("resWpm").textContent = wpm;
+          $("resGrade").textContent = v[0];
+          $("resVerdict").textContent = v[1];
+          $("resMeta").textContent = (lang === "th" ? "ภาษาไทย" : "English") + " · " + duration + " วิ";
+          $("resAcc").innerHTML = acc + "<small> %</small>";
+          $("resRaw").innerHTML = raw + "<small> WPM</small>";
+          $("resChars").innerHTML = correct + " <small>/</small> " + wrong;
+          $("resCons").innerHTML = cons === null ? "–" : cons + "<small> %</small>";
+
+          var bench = BENCH[lang];
+          $("benchFill").style.width = Math.min(100, (wpm / bench.max) * 100) + "%";
+          $("benchAvg").style.left = ((bench.avg / bench.max) * 100) + "%";
+          $("benchAvgLabel").textContent = bench.label;
+          $("benchMaxLabel").textContent = bench.max + "+";
+
+          var key = lang + "-" + duration;
+          var hadPrevious = history.some(function (h) { return h.key === key; });
+          var isBest = !bestByKey[key] || wpm > bestByKey[key];
+          if (isBest) bestByKey[key] = wpm;
+          $("badgeNew").classList.toggle("show", isBest && hadPrevious && wpm > 0);
+
+          history.unshift({ key: key, lang: lang, duration: duration, wpm: wpm, acc: acc, correct: correct, wrong: wrong });
+          renderHistory();
+          resultsEl.classList.add("show");
+          resultsEl.scrollIntoView({ behavior: "smooth", block: "nearest" });
+        }
+
+        function renderHistory() {
+          var empty = $("histEmpty"), table = $("histTable"), body = $("histBody");
+          if (!history.length) { empty.style.display = ""; table.style.display = "none"; return; }
+          empty.style.display = "none"; table.style.display = "";
+          body.innerHTML = "";
+          history.slice(0, 8).forEach(function (h, i) {
+            var tr = document.createElement("tr");
+            var mode = (h.lang === "th" ? "ไทย" : "EN") + " · " + h.duration + "วิ";
+            tr.innerHTML = "";
+            var cells = [
+              { t: String(history.length - i) },
+              { t: mode, tag: true },
+              { t: String(h.wpm), num: true },
+              { t: h.acc + "%", num: true },
+              { t: h.correct + "/" + h.wrong, num: true }
+            ];
+            cells.forEach(function (c) {
+              var td = document.createElement("td");
+              if (c.num) td.className = "num";
+              if (c.tag) { var sp = document.createElement("span"); sp.className = "tag"; sp.textContent = c.t; td.appendChild(sp); }
+              else td.textContent = c.t;
+              tr.appendChild(td);
+            });
+            body.appendChild(tr);
+          });
+        }
+
+        document.addEventListener("visibilitychange", function () {
+          if (!document.hidden && started && !finished) tick();
+        });
+
+        /* ---------- Wiring ---------- */
+        cardEl.addEventListener("click", function () { typerEl.focus({ preventScroll: true }); });
+        typerEl.addEventListener("focus", function () { cardEl.classList.add("focused"); });
+        typerEl.addEventListener("blur", function () { cardEl.classList.remove("focused"); });
+        typerEl.addEventListener("input", onInput);
+        typerEl.addEventListener("paste", function (ev) { ev.preventDefault(); });
+        /* Keep a hardware keyboard usable even when the textarea lost focus mid-test */
+        document.addEventListener("keydown", function (ev) {
+          if (ev.target === typerEl || ev.metaKey || ev.ctrlKey || ev.altKey) return;
+          if (ev.key && ev.key.length === 1 || ev.key === "Backspace") typerEl.focus({ preventScroll: true });
+        });
+
+        $("langSeg").addEventListener("click", function (ev) {
+          var b = ev.target.closest("button"); if (!b) return;
+          if (b.dataset.lang === lang) return;
+          lang = b.dataset.lang;
+          var btns = this.querySelectorAll("button");
+          for (var i = 0; i < btns.length; i++) btns[i].setAttribute("aria-pressed", btns[i] === b ? "true" : "false");
+          reset(pickPassage(lang));
+          typerEl.focus({ preventScroll: true });
+        });
+        $("durSeg").addEventListener("click", function (ev) {
+          var b = ev.target.closest("button"); if (!b) return;
+          duration = parseInt(b.dataset.dur, 10);
+          var btns = this.querySelectorAll("button");
+          for (var i = 0; i < btns.length; i++) btns[i].setAttribute("aria-pressed", btns[i] === b ? "true" : "false");
+          reset(PASSAGES[lang][passageIdx[lang]]);
+          typerEl.focus({ preventScroll: true });
+        });
+
+        function restartSame() { reset(PASSAGES[lang][passageIdx[lang]]); typerEl.focus({ preventScroll: true }); }
+        function restartNew() { reset(pickPassage(lang)); typerEl.focus({ preventScroll: true }); }
+        $("btnRestart").addEventListener("click", function (ev) { ev.stopPropagation(); restartSame(); });
+        $("btnNew").addEventListener("click", function (ev) { ev.stopPropagation(); restartNew(); });
+        $("btnAgain").addEventListener("click", restartSame);
+        $("btnAgainNew").addEventListener("click", restartNew);
+
+        /* ---------- Init ---------- */
+        reset(pickPassage(lang));
+      })();
+    </script>
+  </body>
+</html>
